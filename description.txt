@@ -1,0 +1,99 @@
+###Food Order NER Project Documentation###
+
+1. Project Overview
+    This project focuses on automating the identification of customer order intents and extracting key entities, such as food items, quantities, and customizations, from speech-transcribed food order texts through Named Entity Recognition (NER). The primary goal is to create an efficient pre-labeling pipeline that prepares data for subsequent model training and analysis.
+    FOOD — names of food items (e.g., dosa, idli, pongal)
+
+    QUANTITY — amount or count (e.g., 1 plate, 2 idlis)
+
+    CUSTOMIZATION — special instructions or modifiers (e.g., no onion, extra chutney)
+
+    This model will help automated order processing and improve order accuracy in our food delivery pipeline.
+
+2. Dataset
+2.1 Dataset Description
+    The training dataset consists of annotated text samples where each token is labeled with BIO-format tags corresponding to FOOD, QUANTITY, CUSTOMIZATION, or Outside (O).
+
+    Initial dataset contained ~300 samples, which was augmented by adding noisy and typo-inclusive examples to improve model robustness, resulting in 50+ additional samples generated synthetically.
+
+2.2 Data Format
+    Input examples are structured as JSON objects containing "tokens" (list of words) and "labels" (list of corresponding BIO tags).
+
+3. Model Details
+3.1 Model Architecture
+    Base Model: BERT-base-uncased (Bidirectional Encoder Representations from Transformers)
+
+    Task Head: Token classification head on top of BERT to classify each token into one of the label classes (BIO tags).
+
+3.2 Training Setup
+    Fine-tuned the pretrained BERT model on our annotated dataset for 10 epochs.
+
+    Learning rate and batch size were tuned to optimize performance.
+
+    Used Hugging Face Transformers library for training and evaluation.
+
+3.3 Label Scheme
+    Used BIO tagging scheme with these labels:
+
+    B-FOOD, I-FOOD
+
+    B-QUANTITY, I-QUANTITY
+
+    B-CUSTOMIZATION, I-CUSTOMIZATION
+
+    O for tokens outside entities
+
+4. Results
+
+4.1 Evaluation Metrics
+    Loss: ~0.044
+
+    Precision: 97.15%
+
+    Recall: 98.20%
+
+    F1 Score: 97.67%
+
+
+4.2 Sample Predictions
+    Input: "Can I get 2 plates of idly with some extra chutney please"
+
+    Entities detected correctly: "2 plates" (QUANTITY), "idly" (FOOD), "extra chutney" (CUSTOMIZATION)
+
+    Input: "I want a masala dosa no ghee and a small vada"
+
+    Entities detected: "masala dosa" (FOOD), "no ghee" (CUSTOMIZATION), "small" (QUANTITY), "vada" (FOOD)
+
+4.3 Observations
+    The model accurately detects quantity and customization entities with high confidence.
+
+    Some fragmentation and lower confidence occasionally occurs in multi-word FOOD items.
+
+    Noisy data and typo-inclusive training helped improve generalization.
+
+5. Next Steps & Improvements
+
+5.1 Data Expansion
+    Increase dataset size with more diverse, real-world examples from actual user orders.
+
+    Focus on edge cases like compound food names and ambiguous phrases.
+
+5.2 Model Enhancements
+    Experiment with larger models like RoBERTa or domain-adapted models for better understanding of domain-specific language.
+
+    Apply sequence-level constraints or CRF layers to improve label consistency.
+
+5.3 Post-processing
+    Implement heuristics or dictionaries to resolve token fragmentation or incorrect splits.
+
+    Add confidence thresholds and fallback rules for production robustness.
+
+6. Conclusion
+The current fine-tuned BERT-based NER model achieves strong performance on food order data and is ready for initial deployment in the order automation pipeline. Ongoing improvements will focus on expanding dataset coverage and improving entity detection consistency.
+
+NOTE:In Named Entity Recognition (NER), the key evaluation metrics are Precision, Recall, and F1-Score.
+
+In my case:
+
+Precision : ~97%, Recall : ~98%, F1-Score : ~97.5%
+These results indicate that the model is performing effectively. It accurately identifies the correct entities (high precision) while successfully capturing the majority of relevant information (high recall). The strong F1-score reflects a well-balanced performance between accuracy and completeness.
