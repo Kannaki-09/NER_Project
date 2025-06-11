@@ -6,7 +6,7 @@ from transformers import pipeline
 import numpy as np
 from datasets import Dataset 
 
-# Step 1: Sample data
+# Step 1: data
 data = [
     {"tokens": ["1", "masala", "vada", "with", "spicy"], "labels": ["B-QUANTITY", "B-FOOD", "I-FOOD", "O", "B-CUSTOMIZATION"]},
     {"tokens": ["2", "idlis", "with", "extra", "chutney"], "labels": ["B-QUANTITY", "B-FOOD", "O", "B-CUSTOMIZATION", "I-CUSTOMIZATION"]},
