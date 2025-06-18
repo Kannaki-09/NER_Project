@@ -1,10 +1,13 @@
+
+import numpy as np
+from datasets import Dataset
+from seqeval.metrics import classification_report
 from transformers import AutoTokenizer, AutoModelForTokenClassification, Trainer, TrainingArguments, DataCollatorForTokenClassification
-from datasets import load_dataset, Dataset
-from seqeval.metrics import precision_score, recall_score, f1_score, classification_report
+from seqeval.metrics import classification_report
+from sklearn.metrics import ConfusionMatrixDisplay, precision_recall_fscore_support
 from sklearn.model_selection import train_test_split
 from transformers import pipeline
-import numpy as np
-from datasets import Dataset 
+
 
 # Step 1: data
 data = [
@@ -503,9 +506,7 @@ data = [
     
 ]
 
-
 #Dataset Format
-
 dataset = Dataset.from_list(data)
 print("✅ Dataset created.")
 
@@ -570,14 +571,12 @@ def tokenize_and_align_labels(example):
 
 tokenized_dataset = dataset.map(tokenize_and_align_labels, remove_columns=["tokens", "labels"])
 
-
 print("✅ Tokenization and label alignment completed.\n")
 print(tokenized_dataset.column_names)
-print(tokenized_dataset[0]) 
 
 # Step 6: View first tokenized sample
 print("Example:")
-print(tokenized_dataset[0])
+print(tokenized_dataset[0]) 
 
 #step 7: Dataset Splitting
 train_testvalid = tokenized_dataset.train_test_split(test_size=0.2, seed=42)
@@ -587,9 +586,17 @@ valid_dataset = train_testvalid["test"]
 # Step 7: Data collator
 data_collator = DataCollatorForTokenClassification(tokenizer)
 
+#Custom tokens
+custom_tokens = ["idlies", "idly", "idlis", "dossas","chutney","chutni" ,"dosa", "pongal", "sambar","xtra" , "poori", "vada", "1qty","chutneys","pls"]
+tokenizer.add_tokens(custom_tokens)
+model.resize_token_embeddings(len(tokenizer))
+for token in custom_tokens:
+    print(f"{token}: {tokenizer.tokenize(token)}")
+
+#Classification Report 
 def compute_metrics(p):
-    predictions, labels = p
-    preds = np.argmax(predictions, axis=2)
+    preds = np.argmax(p.predictions, axis=2)
+    labels = p.label_ids
 
     true_labels = [
         [id_to_label[label] for label in label_seq if label != -100]
@@ -600,10 +607,15 @@ def compute_metrics(p):
         for pred_seq, label_seq in zip(preds, labels)
     ]
 
+    all_preds = [label for seq in true_preds for label in seq]
+    all_labels = [label for seq in true_labels for label in seq]
+
+    precision, recall, f1, _ = precision_recall_fscore_support(all_labels, all_preds, average="macro")
+
     return {
-        "precision": precision_score(true_labels, true_preds),
-        "recall": recall_score(true_labels, true_preds),
-        "f1": f1_score(true_labels, true_preds),
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
     }
 
 
