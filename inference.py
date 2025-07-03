@@ -1,7 +1,7 @@
 
 from transformers import pipeline
 
-ner_pipeline = pipeline("token-classification", model="./ner-bert-model", tokenizer="./ner-bert-model", aggregation_strategy="simple")
+ner_pipeline = pipeline("token-classification", model="./ner-bert-model", tokenizer="./ner-bert-model", aggregation_strategy="first")
 
 # Try a sentence
 test_sentence = [
